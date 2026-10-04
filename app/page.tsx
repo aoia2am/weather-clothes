@@ -1,58 +1,39 @@
 "use client";
 
 import { useEffect, useState } from "react";
-
-type WeatherData = {
-  temperature: number;
-  apparentTemperature: number;
-  maxTemperature: number;
-  minTemperature: number;
-};
+import WeatherCard from "./components/WeatherCard";
+import { fetchWeather, type WeatherData } from "./lib/weather";
 
 export default function Home() {
   const [weather, setWeather] = useState<WeatherData | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    async function fetchWeather() {
+    async function loadWeather() {
       try {
-        const latitude = 35.65;
-        const longitude = 139.54;
+        console.log("天気取得開始");
 
-        const url =
-          `https://api.open-meteo.com/v1/forecast` +
-          `?latitude=${latitude}` +
-          `&longitude=${longitude}` +
-          `&current=temperature_2m,apparent_temperature` +
-          `&daily=temperature_2m_max,temperature_2m_min` +
-          `&timezone=Asia%2FTokyo`;
-        console.log("API取得開始");
+        const data = await fetchWeather();
 
-        const response = await fetch(url);
+        console.log("取得成功:", data);
 
-        console.log("レスポンス:", response);
-
-        if (!response.ok) {
-          throw new Error("天気APIの取得に失敗しました");
-        }
-
-        const data = await response.json();
-
-        console.log("取得したデータ:", data);
-
-        setWeather({
-          temperature: data.current.temperature_2m,
-          apparentTemperature: data.current.apparent_temperature,
-          maxTemperature: data.daily.temperature_2m_max[0],
-          minTemperature: data.daily.temperature_2m_min[0],
-        });
-
+        setWeather(data);
       } catch (error) {
-        console.error("エラー:", error);
+        console.error("天気取得エラー:", error);
+        setError("天気データを取得できませんでした");
       }
     }
 
-    fetchWeather();
+    loadWeather();
   }, []);
+
+  if (error) {
+    return (
+      <main className="min-h-screen flex items-center justify-center">
+        <p>{error}</p>
+      </main>
+    );
+  }
 
   if (!weather) {
     return (
@@ -64,45 +45,7 @@ export default function Home() {
 
   return (
     <main className="min-h-screen bg-gray-100 flex items-center justify-center p-6">
-      <div className="w-full max-w-md rounded-3xl bg-white p-8 shadow-sm">
-        <p className="text-gray-500">調布</p>
-
-        <div className="mt-4 text-center">
-          <p className="text-6xl">🌤️</p>
-
-          <p className="mt-3 text-5xl font-bold">
-            {weather.temperature}℃
-            <span className="ml-2 text-lg font-normal text-gray-500">
-              （体感 {weather.apparentTemperature}℃）
-            </span>
-          </p>
-
-          <p className="mt-3 text-gray-500">
-            最高 {weather.maxTemperature}℃ / 最低 {weather.minTemperature}℃
-          </p>
-      </div>
-
-      <div className="mt-8">
-        <h2 className="text-xl font-bold">今日の服装</h2>
-
-        <div className="mt-4 space-y-4">
-          <div>
-            <p className="text-sm text-gray-500">👕 トップス</p>
-            <p className="text-lg">長袖シャツ</p>
-          </div>
-
-          <div>
-            <p className="text-sm text-gray-500">👖 ボトムス</p>
-            <p className="text-lg">長ズボン</p>
-          </div>
-
-          <div>
-            <p className="text-sm text-gray-500">🧥 アウター</p>
-            <p className="text-lg">薄手のジャケット</p>
-          </div>
-        </div>
-      </div>
-    </div>
-    </main >
+      <WeatherCard weather={weather} />
+    </main>
   );
 }
