@@ -7,8 +7,8 @@ export type WeatherData = {
 };
 
 export async function fetchWeather(): Promise<WeatherData> {
-  const latitude = 35.65;
-  const longitude = 139.54;
+  const latitude = 35.6909;
+  const longitude = 139.7003;
 
   const url =
     `https://api.open-meteo.com/v1/forecast` +

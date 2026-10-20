@@ -18,7 +18,7 @@ const weatherIcon = getWeatherIcon(weather.weatherCode);
   return (
     <div className="w-full max-w-md rounded-3xl bg-white p-8 shadow-md">
       <p className="text-lg font-medium text-black">
-        調布
+        新宿
       </p>
 
       <div className="mt-6 text-center">
